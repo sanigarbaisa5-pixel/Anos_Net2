@@ -1,0 +1,165 @@
+
+{% extends "base.html" %}
+{% block title %}{% if recipient %}Discussion avec {{ recipient.username }}{% else %}Discussion publique{% endif %} · ANOS NET{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h1>{% if recipient %}💌 {{ recipient.username }}{% else %}💬 Discussion publique{% endif %}</h1>
+  <p id="chat-status">Connexion à la messagerie…</p>
+
+  <div id="chat-list" class="chat-list">
+    {% for message in messages %}
+    <article class="msg {% if message.sender_id == current_user.id %}mine{% endif %}"
+             data-message-id="{{ message.id }}">
+      <strong>{{ message.sender.username }}</strong>
+      <small>{{ message.created_at.strftime('%d/%m %H:%M') }}</small>
+      {% if message.body %}<p>{{ message.body }}</p>{% endif %}
+      {% if message.image_url %}
+      <a href="{{ message.image_url }}" target="_blank" rel="noopener">
+        <img class="chat-image" src="{{ message.image_url }}" alt="Image reçue">
+      </a>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+
+  <form id="chat-form" enctype="multipart/form-data">
+    <textarea name="body" rows="3" maxlength="2000" placeholder="Écrire un message…"></textarea>
+    <label for="chat-image">📷 Joindre une image</label>
+    <input id="chat-image" type="file" name="image" accept="image/*">
+    <button id="send-button" type="submit">Envoyer ➤</button>
+  </form>
+  <p id="send-error" class="muted"></p>
+</section>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+(() => {
+  const list = document.getElementById("chat-list");
+  const status = document.getElementById("chat-status");
+  const form = document.getElementById("chat-form");
+  const errorBox = document.getElementById("send-error");
+  const sendButton = document.getElementById("send-button");
+
+  const myId = {{ current_user.id|tojson }};
+  const privateUserId = {{ (recipient.id if recipient else none)|tojson }};
+  const sendUrl = privateUserId === null
+    ? {{ url_for('api_send_public')|tojson }}
+    : {{ url_for('api_send_private', user_id=recipient.id if recipient else 0)|tojson }};
+
+  const seen = new Set(
+    Array.from(list.querySelectorAll("[data-message-id]"))
+      .map(el => el.dataset.messageId)
+  );
+
+  function scrollToBottom() {
+    window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+  }
+
+  function addMessage(message) {
+    const id = String(message.id);
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    const article = document.createElement("article");
+    article.className = "msg" + (Number(message.sender_id) === Number(myId) ? " mine" : "");
+    article.dataset.messageId = id;
+
+    const name = document.createElement("strong");
+    name.textContent = message.sender || "Joueur";
+    article.appendChild(name);
+
+    const time = document.createElement("small");
+    time.textContent = " · " + (message.created_at || "");
+    article.appendChild(time);
+
+    if (message.body) {
+      const body = document.createElement("p");
+      body.textContent = message.body;
+      article.appendChild(body);
+    }
+
+    if (message.image_url) {
+      const link = document.createElement("a");
+      link.href = message.image_url;
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      const image = document.createElement("img");
+      image.src = message.image_url;
+      image.alt = "Image envoyée";
+      image.className = "chat-image";
+      image.loading = "lazy";
+
+      link.appendChild(image);
+      article.appendChild(link);
+    }
+
+    list.appendChild(article);
+    scrollToBottom();
+  }
+
+  // Socket.IO uses the current logged-in session cookie.
+  const socket = io();
+
+  socket.on("connect", () => {
+    status.textContent = "🟢 Connecté · messages en direct";
+    if (privateUserId !== null) {
+      socket.emit("join_private", {user_id: privateUserId});
+    }
+  });
+
+  socket.on("disconnect", () => {
+    status.textContent = "🟠 Connexion interrompue. Reconnexion en cours…";
+  });
+
+  socket.on("connect_error", () => {
+    status.textContent = "🔴 Connexion en direct impossible.";
+  });
+
+  socket.on("new_message", addMessage);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorBox.textContent = "";
+
+    const formData = new FormData(form);
+    const body = String(formData.get("body") || "").trim();
+    const file = formData.get("image");
+
+    if (!body && !(file && file.name)) {
+      errorBox.textContent = "Écris un message ou choisis une image.";
+      return;
+    }
+
+    sendButton.disabled = true;
+    sendButton.textContent = "Envoi…";
+
+    try {
+      const response = await fetch(sendUrl, {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "L'envoi a échoué.");
+      }
+
+      // The server broadcasts the message over Socket.IO.
+      // Do not append it here, to avoid displaying it twice.
+      form.reset();
+    } catch (error) {
+      errorBox.textContent = error.message || "Erreur de connexion.";
+    } finally {
+      sendButton.disabled = false;
+      sendButton.textContent = "Envoyer ➤";
+    }
+  });
+
+  scrollToBottom();
+})();
+</script>
+{% endblock %}
