@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}
+{% block title %}Inscription · ANOS NET{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>✨ Rejoindre ANOS NET</h1>
+  <p class="muted">Crée ton compte en quelques secondes.</p>
+  <form method="post">
+    <label for="username">Pseudo (3 à 30 caractères)</label>
+    <input id="username" name="username" minlength="3" maxlength="30" autocomplete="username" required>
+    <label for="password">Mot de passe (8 caractères minimum)</label>
+    <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+    <button class="full" type="submit">Créer mon compte</button>
+  </form>
+  <p>Déjà membre ? <a href="{{ url_for('login') }}">Se connecter</a></p>
+</section>
+{% endblock %}
