@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+{% block title %}Modifier mon profil · ANOS NET{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>📸 Photo de profil</h1>
+  <div class="row">
+    <img class="avatar big" src="{{ user.avatar_url or 'https://placehold.co/160x160/17152B/C4A7FF?text=A' }}" alt="">
+    <strong>{{ user.username }}</strong>
+  </div>
+  <form method="post" enctype="multipart/form-data">
+    <label for="avatar">Choisir une image dans la galerie</label>
+    <input id="avatar" type="file" name="avatar" accept="image/*" required>
+    <button type="submit">Enregistrer la photo</button>
+  </form>
+  <p class="muted">La photo est stockée sur Cloudinary.</p>
+</section>
+{% endblock %}
