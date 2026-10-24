@@ -1,0 +1,128 @@
+
+{% extends "base.html" %}
+{% block title %}Accueil · ANOS NET{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <small>FREE FIRE COMMUNITY</small>
+  <h1>Bienvenue sur ANOS NET ⚡</h1>
+  <p>Retrouve tes joueurs, partage tes moments Free Fire et rejoins la communauté.</p>
+
+  {% if not current_user %}
+  <div class="auth-buttons">
+    <a class="btn" href="{{ url_for('login') }}">🔑 SE CONNECTER</a>
+    <a class="signup" href="{{ url_for('register') }}">✨ S'INSCRIRE</a>
+  </div>
+  {% else %}
+  <p>Connecté en tant que <strong>{{ current_user.username }}</strong></p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>🚀 Accès rapides</h2>
+  <div class="icon-grid">
+    {% if current_user %}
+    <a class="icon-card" href="{{ url_for('profile',user_id=current_user.id) }}">
+      <span>👤</span><small>Mon profil</small>
+    </a>
+    {% else %}
+    <a class="icon-card" href="{{ url_for('login') }}">
+      <span>👤</span><small>Profil</small>
+    </a>
+    {% endif %}
+
+    <a class="icon-card" href="{{ url_for('search') }}">
+      <span>🔎</span><small>Joueurs</small>
+    </a>
+
+    {% if current_user %}
+    <a class="icon-card" href="{{ url_for('public_chat') }}">
+      <span>💬</span><small>Messages</small>
+    </a>
+    {% else %}
+    <a class="icon-card" href="{{ url_for('login') }}">
+      <span>💬</span><small>Messages</small>
+    </a>
+    {% endif %}
+
+    <a class="icon-card" href="#publications">
+      <span>🌐</span><small>Communauté</small>
+    </a>
+
+    {% if current_user %}
+    <a class="icon-card" href="#create-post">
+      <span>🖼️</span><small>Publier</small>
+    </a>
+    <a class="icon-card" href="{{ url_for('edit_profile') }}">
+      <span>⚙️</span><small>Mon compte</small>
+    </a>
+    {% else %}
+    <a class="icon-card" href="{{ url_for('register') }}">
+      <span>🖼️</span><small>Publier</small>
+    </a>
+    <a class="icon-card" href="{{ url_for('login') }}">
+      <span>⚙️</span><small>Mon compte</small>
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+{% if current_user %}
+<section class="card" id="create-post">
+  <h2>📸 Créer une publication</h2>
+  <form method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
+    <textarea name="caption" maxlength="1000" rows="3" placeholder="Quoi de neuf sur Free Fire ?"></textarea>
+    <label for="post-image">Choisir une image</label>
+    <input id="post-image" type="file" name="image" accept="image/*">
+    <button type="submit">Publier</button>
+  </form>
+</section>
+{% endif %}
+
+<section id="publications">
+  <h2>✨ Publications récentes</h2>
+
+  {% for post in posts %}
+  <article class="card">
+    <div class="row">
+      <img class="avatar" src="{{ post.author.avatar_url or 'https://placehold.co/100x100/17152B/C4A7FF?text=A' }}" alt="">
+      <div>
+        <strong><a href="{{ url_for('profile',user_id=post.author.id) }}">{{ post.author.username }}</a></strong><br>
+        <small>{{ post.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+      </div>
+    </div>
+
+    {% if post.caption %}<p style="white-space:pre-wrap">{{ post.caption }}</p>{% endif %}
+    {% if post.image_url %}<img class="post-image" src="{{ post.image_url }}" alt="Publication">{% endif %}
+
+    <div class="actions">
+      <span>❤️ {{ post.likes|length }} J’aime</span>
+      {% if current_user %}
+      <form method="post" action="{{ url_for('like_post',post_id=post.id) }}">
+        <button class="secondary" type="submit">J’aime / retirer</button>
+      </form>
+      {% if current_user.id != post.author.id %}
+      <a class="btn secondary" href="{{ url_for('private_chat',user_id=post.author.id) }}">✉ Message</a>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <h3>Commentaires ({{ post.comments|length }})</h3>
+    {% for comment in post.comments|sort(attribute='created_at') %}
+    <div class="comment">
+      <strong>{{ comment.author.username }}</strong> {{ comment.body }}
+    </div>
+    {% endfor %}
+
+    {% if current_user %}
+    <form method="post" action="{{ url_for('comment_post',post_id=post.id) }}">
+      <input name="body" maxlength="1000" placeholder="Écrire un commentaire..." required>
+      <button class="secondary" type="submit">Commenter</button>
+    </form>
+    {% endif %}
+  </article>
+  {% else %}
+  <div class="card"><p>Aucune publication pour le moment.</p></div>
+  {% endfor %}
+</section>
+{% endblock %}
