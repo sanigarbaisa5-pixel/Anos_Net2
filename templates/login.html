@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}
+{% block title %}Connexion · ANOS NET{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>🔑 Se connecter</h1>
+  <p class="muted">Retrouve ta communauté Free Fire.</p>
+  <form method="post">
+    <label for="username">Pseudo</label>
+    <input id="username" name="username" autocomplete="username" required>
+    <label for="password">Mot de passe</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="full" type="submit">Se connecter</button>
+  </form>
+  <p>Pas encore de compte ? <a href="{{ url_for('register') }}">S'inscrire</a></p>
+</section>
+{% endblock %}
