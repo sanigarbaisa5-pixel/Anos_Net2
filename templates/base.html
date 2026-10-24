@@ -1,0 +1,141 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}ANOS NET{% endblock %}</title>
+<style>
+:root {
+  --bg:#080A12;
+  --card:#121626;
+  --line:#292E46;
+  --text:#F4F2FF;
+  --muted:#A5A9C4;
+  --purple:#A78BFA;
+  --cyan:#67E8F9;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:radial-gradient(ellipse at top,#17152B 0%,var(--bg) 55%);
+  color:var(--text);
+  font-family:system-ui,Arial,sans-serif;
+  min-height:100vh;
+}
+a { color:var(--cyan); text-decoration:none; }
+header {
+  padding:16px;
+  border-bottom:1px solid var(--line);
+  background:#090B14;
+}
+nav,.container { width:min(850px,100%); margin:auto; }
+.brand { font-size:1.35rem; font-weight:900; color:white; }
+.container { padding:16px; }
+.card {
+  background:linear-gradient(145deg,#171B2D,#101321);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  margin:14px 0;
+}
+h1 { font-size:1.65rem; }
+h2 { font-size:1.2rem; }
+.muted,small { color:var(--muted); }
+input:not([type=file]),textarea {
+  width:100%;
+  background:#0A0D18;
+  color:white;
+  border:1px solid #343954;
+  border-radius:12px;
+  padding:12px;
+  margin:7px 0 14px;
+  font:inherit;
+}
+input[type=file] { width:100%; margin:12px 0; }
+button,.btn {
+  display:inline-block;
+  border:0;
+  border-radius:12px;
+  padding:11px 15px;
+  background:linear-gradient(110deg,#A78BFA,#7660E8);
+  color:white;
+  font-weight:750;
+  font:inherit;
+  cursor:pointer;
+}
+.secondary { background:#20263B; border:1px solid #3A4160; }
+.full { width:100%; text-align:center; }
+.actions { display:flex; flex-wrap:wrap; gap:9px; margin:12px 0; }
+.hero {
+  padding:24px 18px;
+  border:1px solid #39305E;
+  border-radius:22px;
+  background:linear-gradient(135deg,#21183D,#111727 70%);
+}
+.hero p { color:#B7B7D2; line-height:1.6; }
+.auth-buttons { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px; }
+.auth-buttons a { text-align:center; padding:14px 6px; font-weight:800; border-radius:13px; }
+.signup { background:#18152A; border:1px solid var(--purple); color:#D9CCFF; }
+.icon-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.icon-card {
+  background:#15182A;
+  border:1px solid #34304F;
+  border-radius:16px;
+  min-height:95px;
+  padding:12px 4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#EAE6FF;
+  text-align:center;
+}
+.icon-card span { font-size:1.65rem; }
+.icon-card small { font-size:.78rem; }
+.avatar { width:44px;height:44px;object-fit:cover;border-radius:50%;background:#242943; }
+.avatar.big { width:82px;height:82px; }
+.row { display:flex;align-items:center;gap:10px; }
+.post-image,.chat-image { display:block;max-width:100%;max-height:500px;object-fit:contain;border-radius:13px;margin:12px auto; }
+.flash { padding:12px;border-radius:12px;background:#222942;margin:10px 0; }
+.flash.danger { background:#51252D; }
+.flash.success { background:#174234; }
+.flash.warning { background:#493A1B; }
+.comment { border-top:1px solid var(--line);padding:9px 0; }
+.chat-list { display:flex;flex-direction:column;gap:10px; }
+.msg { max-width:90%;padding:11px 13px;background:#1B2135;border:1px solid #303751;border-radius:14px;overflow-wrap:anywhere; }
+.msg.mine { align-self:flex-end;background:#30244F;border-color:#55427C; }
+.msg p { white-space:pre-wrap; }
+#chat-status { color:var(--muted);font-size:.8rem;margin:8px 0; }
+footer { text-align:center;color:var(--muted);padding:25px 12px;font-size:.85rem; }
+@media(max-width:400px) {
+  .container { padding:10px; }
+  .card { padding:13px; }
+  .auth-buttons { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <nav>
+    <a class="brand" href="{{ url_for('index') }}">⚡ ANOS NET</a>
+  </nav>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category,message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  ANOS NET · Communauté Free Fire<br><br>
+  <a href="https://wa.me/23407071776576?text=Bonjour%20ANOS%20NET%2C%20je%20veux%20envoyer%20un%20retour."
+     target="_blank" rel="noopener">📩 Donner un avis sur WhatsApp</a>
+</footer>
+</body>
+</html>
