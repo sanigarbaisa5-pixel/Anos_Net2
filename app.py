@@ -30,7 +30,6 @@ db = SQLAlchemy(app)
 socketio = SocketIO(
     app,
     async_mode="threading",
-    cors_allowed_origins=[],
     logger=False,
     engineio_logger=False
 )
