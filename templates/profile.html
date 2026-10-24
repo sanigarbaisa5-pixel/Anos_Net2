@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+{% block title %}Profil de {{ user.username }} · ANOS NET{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="row">
+    <img class="avatar big" src="{{ user.avatar_url or 'https://placehold.co/160x160/17152B/C4A7FF?text=A' }}" alt="">
+    <div>
+      <h1>{{ user.username }}</h1>
+      <small>Membre depuis le {{ user.created_at.strftime('%d/%m/%Y') }}</small>
+    </div>
+  </div>
+  <div class="actions">
+    {% if current_user and current_user.id == user.id %}
+      <a class="btn" href="{{ url_for('edit_profile') }}">⚙️ Modifier mon profil</a>
+    {% elif current_user %}
+      <a class="btn" href="{{ url_for('private_chat',user_id=user.id) }}">💌 Message privé</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('login') }}">Se connecter pour discuter</a>
+    {% endif %}
+  </div>
+</section>
+
+<h2>Publications</h2>
+{% for post in posts %}
+<article class="card">
+  <small>{{ post.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+  {% if post.caption %}<p style="white-space:pre-wrap">{{ post.caption }}</p>{% endif %}
+  {% if post.image_url %}<img class="post-image" src="{{ post.image_url }}" alt="Publication">{% endif %}
+  <p>❤️ {{ post.likes|length }} J’aime · 💬 {{ post.comments|length }} commentaires</p>
+</article>
+{% else %}
+<div class="card">Aucune publication pour le moment.</div>
+{% endfor %}
+{% endblock %}
