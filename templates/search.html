@@ -1,0 +1,28 @@
+
+{% extends "base.html" %}
+{% block title %}Rechercher un joueur · ANOS NET{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>🔎 Trouver un joueur</h1>
+  <form method="get">
+    <label for="q">Pseudo à rechercher</label>
+    <input id="q" name="q" value="{{ query }}" placeholder="Ex. Anos" required>
+    <button type="submit">Rechercher</button>
+  </form>
+
+  {% for user in users %}
+  <div class="row" style="padding:12px 0;border-top:1px solid #292E46">
+    <img class="avatar" src="{{ user.avatar_url or 'https://placehold.co/100x100/17152B/C4A7FF?text=A' }}" alt="">
+    <div style="flex:1">
+      <strong>{{ user.username }}</strong><br>
+      <a href="{{ url_for('profile',user_id=user.id) }}">Voir le profil</a>
+    </div>
+    {% if current_user and current_user.id != user.id %}
+    <a class="btn secondary" href="{{ url_for('private_chat',user_id=user.id) }}">💬 Écrire</a>
+    {% endif %}
+  </div>
+  {% else %}
+    {% if query %}<p>Aucun joueur trouvé pour « {{ query }} ».</p>{% endif %}
+  {% endfor %}
+</section>
+{% endblock %}
